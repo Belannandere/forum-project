@@ -20,7 +20,7 @@
 - **Backend:** Python 3, Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF
 - **Frontend:** HTML5, CSS3, Bootstrap 5, JavaScript (AJAX, Fetch API), Quill.js
 - **База данных:** SQLite (можно заменить на PostgreSQL)
-- **Дополнительно:** python-dotenv, Werkzeug, HTMLParser (самописная санитизация)
+- **Дополнительно:** python-dotenv, Werkzeug, HTMLParser
 
 ## 📦 Установка и запуск
 
