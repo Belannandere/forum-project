@@ -80,30 +80,33 @@ python seed.py
 
 ## 📸 Скриншоты
 
-<figure style="text-align: center; margin-bottom: 2rem;">
-  <img src="screenshots/main-page.png" alt="Главная страница" style="max-width: 10px; width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; margin: 0 auto;">
-  <figcaption style="margin-top: 0.5rem; font-size: 0.95rem; color: #555;"><strong>Главная страница</strong> — лента постов с сортировкой и поиском</figcaption>
-</figure>
+### Главная страница
+![Главная страница](screenshots/main-page.png)
+*Лента постов с сортировкой и поиском.*
 
-<figure style="text-align: center; margin-bottom: 2rem;">
-  <img src="screenshots/post-page.png" alt="Страница поста" style="max-width: 10px; width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; margin: 0 auto;">
-  <figcaption style="margin-top: 0.5rem; font-size: 0.95rem; color: #555;"><strong>Страница поста</strong> — просмотр темы, комментарии и голосование</figcaption>
-</figure>
+---
 
-<figure style="text-align: center; margin-bottom: 2rem;">
-  <img src="screenshots/create-post.png" alt="Создание поста" style="max-width: 10px; width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; margin: 0 auto;">
-  <figcaption style="margin-top: 0.5rem; font-size: 0.95rem; color: #555;"><strong>Создание поста</strong> — WYSIWYG-редактор Quill и загрузка изображений/видео</figcaption>
-</figure>
+### Страница поста
+![Страница поста](screenshots/post-page.png)
+*Просмотр темы, комментарии и голосование.*
 
-<figure style="text-align: center; margin-bottom: 2rem;">
-  <img src="screenshots/profile-page.png" alt="Профиль пользователя" style="max-width: 10px; width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; margin: 0 auto;">
-  <figcaption style="margin-top: 0.5rem; font-size: 0.95rem; color: #555;"><strong>Профиль пользователя</strong> — аватар, баннер, биография и список тем</figcaption>
-</figure>
+---
 
-<figure style="text-align: center; margin-bottom: 2rem;">
-  <img src="screenshots/admin-panel.png" alt="Панель администратора" style="max-width: 10px; width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: block; margin: 0 auto;">
-  <figcaption style="margin-top: 0.5rem; font-size: 0.95rem; color: #555;"><strong>Панель администратора</strong> — управление ролями и блокировка пользователей</figcaption>
-</figure>
+### Создание нового поста
+![Создание поста](screenshots/create-post.png)
+*Редактор Quill и загрузка изображений/видео.*
+
+---
+
+### Профиль пользователя
+![Профиль](screenshots/profile-page.png)
+*Аватар, баннер, биография и список тем.*
+
+---
+
+### Панель администратора
+![Админ-панель](screenshots/admin-panel.png)
+*Управление ролями и блокировка пользователей.*
 
 ---
 
