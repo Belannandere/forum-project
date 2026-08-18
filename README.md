@@ -78,6 +78,47 @@ python seed.py
 
 ---
 
+## 📸 Скриншоты
+
+<div align="center">
+  
+<figure>
+  <img src="screenshots/main-page.png" alt="Главная страница" width="800">
+  <figcaption><strong>Главная страница</strong> — лента постов с сортировкой и поиском</figcaption>
+</figure>
+
+<br>
+
+<figure>
+  <img src="screenshots/post-page.png" alt="Страница поста" width="800">
+  <figcaption><strong>Страница поста</strong> — просмотр темы, комментарии и голосование</figcaption>
+</figure>
+
+<br>
+
+<figure>
+  <img src="screenshots/create-post.png" alt="Создание поста" width="800">
+  <figcaption><strong>Создание поста</strong> — WYSIWYG-редактор Quill и загрузка изображений/видео</figcaption>
+</figure>
+
+<br>
+
+<figure>
+  <img src="screenshots/profile-page.png" alt="Профиль пользователя" width="800">
+  <figcaption><strong>Профиль пользователя</strong> — аватар, баннер, биография и список тем</figcaption>
+</figure>
+
+<br>
+
+<figure>
+  <img src="screenshots/admin-panel.png" alt="Панель администратора" width="800">
+  <figcaption><strong>Панель администратора</strong> — управление ролями и блокировка пользователей</figcaption>
+</figure>
+
+</div>
+
+---
+
 ## 🗑 Если вы всё же решите удалить
 Просто удалите файлы seed.py и manage_users.py из папки и сделайте новый коммит. Но учтите: если вы уже их закоммитили ранее, они останутся в истории Git (это не страшно, но в текущей версии их не будет).
 
