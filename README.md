@@ -28,15 +28,22 @@
    ```bash
    git clone https://github.com/Belannandere/greenforum.git
    cd greenforum
+   ```
 2. Создайте виртуальное окружение и активируйте его:
+   ```
    python -m venv venv
    source venv/bin/activate   # для Linux/Mac
    venv\Scripts\activate      # для Windows
+   ```
 3. Установите зависимости:
+   ```
    pip install -r requirements.txt
+   ```
 4. Создайте файл .env на основе .env.example и заполните секретные ключи (укажите свой SECRET_KEY, DATABASE_URL и т.д.).
 5. Запустите приложение:
+   ```
    python app.py
+   ```
 6. Откройте в браузере: http://localhost:5000
 
 ---
