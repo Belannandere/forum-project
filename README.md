@@ -80,42 +80,30 @@ python seed.py
 
 ## 📸 Скриншоты
 
-<div align="center">
-  
 <figure>
-  <img src="screenshots/main-page.png" alt="Главная страница" width="800">
+  <img src="screenshots/main-page.png" alt="Главная страница" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 100%;">
   <figcaption><strong>Главная страница</strong> — лента постов с сортировкой и поиском</figcaption>
 </figure>
 
-<br>
-
 <figure>
-  <img src="screenshots/post-page.png" alt="Страница поста" width="800">
+  <img src="screenshots/post-page.png" alt="Страница поста" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 100%;">
   <figcaption><strong>Страница поста</strong> — просмотр темы, комментарии и голосование</figcaption>
 </figure>
 
-<br>
-
 <figure>
-  <img src="screenshots/create-post.png" alt="Создание поста" width="800">
+  <img src="screenshots/create-post.png" alt="Создание поста" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 100%;">
   <figcaption><strong>Создание поста</strong> — WYSIWYG-редактор Quill и загрузка изображений/видео</figcaption>
 </figure>
 
-<br>
-
 <figure>
-  <img src="screenshots/profile-page.png" alt="Профиль пользователя" width="800">
+  <img src="screenshots/profile-page.png" alt="Профиль пользователя" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 100%;">
   <figcaption><strong>Профиль пользователя</strong> — аватар, баннер, биография и список тем</figcaption>
 </figure>
 
-<br>
-
 <figure>
-  <img src="screenshots/admin-panel.png" alt="Панель администратора" width="800">
+  <img src="screenshots/admin-panel.png" alt="Панель администратора" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 100%;">
   <figcaption><strong>Панель администратора</strong> — управление ролями и блокировка пользователей</figcaption>
 </figure>
-
-</div>
 
 ---
 
