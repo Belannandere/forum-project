@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Панель администратора</h2>
+
+<div class="card admin-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Имя пользователя</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="admin-row">
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <a href="{{ url_for('profile', username=user.username) }}">{{ user.username }}</a>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('change_role', user_id=user.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <select name="role" onchange="this.form.submit()" class="form-select form-select-sm admin-role-select">
+                                    <option value="user" {% if user.role == 'user' %}selected{% endif %}>Пользователь</option>
+                                    <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>Модератор</option>
+                                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Администратор</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                        {% if user.is_banned %}
+                            <span class="badge bg-danger">Неактивен</span>
+                        {% else %}
+                            <span class="badge bg-success">Активен</span>
+                        {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('ban_user', user_id=user.id) }}" class="d-flex gap-2 align-items-center flex-wrap">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="text" name="reason" placeholder="Причина бана" class="form-control form-control-sm admin-ban-reason"
+                                       value="{{ user.ban_reason if user.is_banned else '' }}"
+                                       {% if user.is_banned %}disabled{% endif %}>
+                                <button type="submit" class="btn btn-sm {% if user.is_banned %}btn-success{% else %}btn-danger{% endif %} admin-ban-btn">
+                                    {{ 'Разблокировать' if user.is_banned else 'Заблокировать' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

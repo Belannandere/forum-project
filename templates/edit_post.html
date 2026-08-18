@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="form-container">
+            <h4 class="mb-4">Редактирование темы</h4>
+            <form method="POST" id="editPostForm" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-4">
+                    <input type="text" name="title" class="form-control-minimal w-100" placeholder="Заголовок темы" value="{{ post.title }}" required>
+                </div>
+
+                <div class="mb-4">
+                    <select name="category" class="form-control-minimal w-100" required>
+                        <option value="">Выберите категорию</option>
+                        {% for cat_id, cat_name in form.category.choices %}
+                            <option value="{{ cat_id }}" {% if post.category_id == cat_id %}selected{% endif %}>{{ cat_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Редактор Quill -->
+                <div class="mb-4">
+                    <div id="quill-editor" style="min-height: 250px;">{{ post.content|safe }}</div>
+                </div>
+
+                <input type="hidden" name="content" id="hiddenContent">
+
+                <!-- Текущее вложение (если есть) -->
+                {% if post.media %}
+                <div class="mb-4">
+                    <label class="form-label-caps">Текущее вложение</label>
+                    <div class="d-flex align-items-center gap-3">
+                        {% if post.media.endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                            <img src="{{ url_for('static', filename='uploads/posts/' + post.media) }}" class="current-media-preview" style="max-height: 100px; border-radius: 8px;">
+                        {% elif post.media.endswith(('.mp4', '.webm', '.mov')) %}
+                            <video controls style="max-height: 100px; border-radius: 8px;">
+                                <source src="{{ url_for('static', filename='uploads/posts/' + post.media) }}">
+                            </video>
+                        {% else %}
+                            <span>{{ post.media }}</span>
+                        {% endif %}
+                        <button type="button" class="btn-icon-delete" data-url="{{ url_for('delete_post_media', post_id=post.id) }}" title="Удалить вложение">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Поле для загрузки нового файла (стилизованное) -->
+                <div class="mb-4">
+                    <label class="form-label-caps">{{ form.media.label.text }}</label>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label">
+                            <i class="fas fa-image"></i> Выбрать файл
+                            {{ form.media(class="file-upload-input", accept="image/*,video/*", id="postMediaEdit") }}
+                        </label>
+                        <div id="mediaPreviewContainerEdit" class="mt-2">
+                            {% if post.media %}
+                                {% if post.media.endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                                    <img src="{{ url_for('static', filename='uploads/posts/' + post.media) }}" class="current-media-preview" style="max-height: 100px;">
+                                {% elif post.media.endswith(('.mp4', '.webm', '.mov')) %}
+                                    <video controls style="max-height: 100px;"><source src="{{ url_for('static', filename='uploads/posts/' + post.media) }}"></video>
+                                {% else %}
+                                    <span>{{ post.media }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <small class="text-muted">При загрузке нового файла старый будет удалён. Максимальный размер: 16 МБ.</small>
+                    {% for error in form.media.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('view_post', slug=post.slug) }}" class="btn-outline-accent">Отмена</a>
+                    <button type="submit" class="btn-accent">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Текст сообщения...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link']
+            ]
+        }
+    });
+
+    if (document.body.classList.contains('dark-theme')) {
+        var qlToolbar = document.querySelector('.ql-toolbar');
+        var qlContainer = document.querySelector('.ql-container');
+        if (qlToolbar) {
+            qlToolbar.style.backgroundColor = '#1e1e1e';
+            qlToolbar.style.borderColor = '#333';
+        }
+        if (qlContainer) {
+            qlContainer.style.backgroundColor = '#1e1e1e';
+            qlContainer.style.borderColor = '#333';
+            qlContainer.style.color = '#e0e0e0';
+        }
+    }
+
+    var editForm = document.getElementById('editPostForm');
+    var hiddenInput = document.getElementById('hiddenContent');
+    if (editForm && hiddenInput) {
+        editForm.addEventListener('submit', function() {
+            hiddenInput.value = quill.root.innerHTML;
+        });
+    }
+
+    // Удаление текущего вложения через AJAX
+    const deleteBtn = document.querySelector('.btn-icon-delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!confirm('Удалить прикреплённый файл?')) return;
+            const url = this.dataset.url;
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            }).catch(err => console.error(err));
+        });
+    }
+
+    // Предпросмотр нового выбранного файла
+    const mediaInput = document.getElementById('postMediaEdit');
+    const mediaPreview = document.getElementById('mediaPreviewContainerEdit');
+    if (mediaInput) {
+        mediaInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (file.type.startsWith('image/')) {
+                        mediaPreview.innerHTML = `<img src="${event.target.result}" class="current-media-preview" style="max-height: 100px; border-radius: 8px;">`;
+                    } else if (file.type.startsWith('video/')) {
+                        mediaPreview.innerHTML = `<video controls style="max-height: 100px; border-radius: 8px;"><source src="${event.target.result}"></video>`;
+                    } else {
+                        mediaPreview.innerHTML = `<span>${file.name}</span>`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Если файл не выбран, оставляем старый превью (или очищаем – на ваше усмотрение)
+                // mediaPreview.innerHTML = '';
+            }
+        });
+    }
+</script>
+{% endblock %}

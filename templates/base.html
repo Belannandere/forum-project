@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GreenForum{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body class="{% if current_user.is_authenticated and current_user.theme == 'dark' %}dark-theme{% endif %}"
+      data-user-theme="{{ current_user.theme if current_user.is_authenticated else 'light' }}"
+      data-is-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}">
+
+    <!-- ========= ШАПКА ========= -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a class="logo" href="{{ url_for('index') }}">
+                    <i class="fas fa-leaf"></i> GreenForum
+                </a>
+            </div>
+            <nav class="header-nav">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('index') }}">Главная</a></li>
+                    <li><a href="{{ url_for('categories_list') }}">Категории</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('profile', username=current_user.username) }}">Профиль</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="header-right">
+                {% if current_user.is_authenticated %}
+                    <div class="action-icons">
+                        <a href="{{ url_for('create_post') }}" class="action-icon" title="Создать тему">
+                            <i class="fas fa-plus-circle"></i>
+                        </a>
+                        <div class="dropdown notifications-dropdown">
+                            <button class="action-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                {% if unread_count > 0 %}
+                                    <span class="notification-badge">{{ unread_count }}</span>
+                                {% endif %}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end notification-menu">
+                                <div class="notification-header">
+                                    <span>Уведомления</span>
+                                    <a href="#" id="markNotificationsRead">Отметить прочитанными</a>
+                                </div>
+                                <div class="notification-list">
+                                    {% if notifications %}
+                                        {% for notif in notifications %}
+                                            <a href="{{ notif.link or '#' }}" class="notification-item {% if not notif.is_read %}unread{% endif %}" data-notification-id="{{ notif.id }}">
+                                                <div class="notification-message">{{ notif.message }}</div>
+                                                <div class="notification-time">{{ notif.created_at|time_ago }}</div>
+                                            </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="notification-empty">Нет уведомлений</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="action-icon hamburger-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-sliders-h me-2"></i>Настройки</a></li>
+                                {% if current_user.role in ['admin', 'moderator'] %}
+                                    <li><a class="dropdown-item" href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt me-2"></i>Админ панель</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="auth-buttons">
+                        <button type="button" class="btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Войти</button>
+                        <button type="button" class="btn-register ms-2" data-bs-toggle="modal" data-bs-target="#registerModal">Регистрация</button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ========= ОСНОВНОЙ КОНТЕЙНЕР ========= -->
+    <div class="container mt-4">
+        <div class="content-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- ========= МОДАЛЬНЫЕ ОКНА ========= -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0"><h5 class="modal-title">Вход</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <form id="loginForm">
+                        {{ login_form.hidden_tag() if login_form else '' }}
+                        <input type="hidden" name="next" id="loginNext" value="">
+                        <div class="mb-3">
+                            <input type="text" name="username" id="loginUsername" class="form-control-minimal w-100" placeholder="Имя пользователя" required>
+                            <div class="text-danger small mt-1" id="loginUsernameError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" id="loginPassword" class="form-control-minimal w-100" placeholder="Пароль" required>
+                            <div class="text-danger small mt-1" id="loginPasswordError"></div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="remember" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label small" for="rememberMe">Запомнить меня</label>
+                        </div>
+                        <button type="submit" class="btn-login w-100 py-2">Войти</button>
+                    </form>
+                    <div class="text-center mt-3"><small>Нет аккаунта? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#registerModal" class="text-accent">Зарегистрируйтесь</a></small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0"><h5 class="modal-title">Регистрация</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <form id="registerForm">
+                        {{ register_form.hidden_tag() if register_form else '' }}
+                        <div class="mb-3">
+                            <input type="text" name="username" id="regUsername" class="form-control-minimal w-100" placeholder="Никнейм" required>
+                            <div class="text-danger small mt-1" id="usernameError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" id="regEmail" class="form-control-minimal w-100" placeholder="Email" required>
+                            <div class="text-danger small mt-1" id="emailError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" id="regPassword" class="form-control-minimal w-100" placeholder="Пароль" required>
+                            <div class="text-danger small mt-1" id="passwordError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password2" id="regPassword2" class="form-control-minimal w-100" placeholder="Повторите пароль" required>
+                            <div class="text-danger small mt-1" id="password2Error"></div>
+                        </div>
+                        <button type="submit" class="btn-login w-100 py-2">Зарегистрироваться</button>
+                    </form>
+                    <div class="text-center mt-3"><small>Уже есть аккаунт? <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-accent">Войдите</a></small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CSRF токен
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Управление темой
+        const bodyEl = document.body;
+        const userTheme = bodyEl.dataset.userTheme;
+        const isAuthenticated = bodyEl.dataset.isAuthenticated === 'true';
+
+        (function() {
+            const savedTheme = localStorage.getItem('forum_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+            } else if (isAuthenticated && userTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('forum_theme', 'dark');
+            }
+        })();
+
+        window.setTheme = function(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('forum_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('forum_theme', 'light');
+            }
+            fetch('/update_theme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ theme: theme })
+            }).catch(err => console.error('Ошибка сохранения темы:', err));
+        };
+
+        // AJAX-вход
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                document.getElementById('loginUsernameError').innerHTML = '';
+                document.getElementById('loginPasswordError').innerHTML = '';
+                const formData = new FormData(loginForm);
+                try {
+                    const response = await fetch("{{ url_for('login') }}", {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.href = data.redirect || "{{ url_for('index') }}";
+                    } else {
+                        if (data.errors) {
+                            if (data.errors.username) document.getElementById('loginUsernameError').innerHTML = data.errors.username;
+                            if (data.errors.password) document.getElementById('loginPasswordError').innerHTML = data.errors.password;
+                        }
+                        if (data.message) document.getElementById('loginPasswordError').innerHTML = data.message;
+                    }
+                } catch (error) {
+                    console.error('Ошибка входа:', error);
+                    alert('Ошибка соединения с сервером.');
+                }
+            });
+        }
+
+        // AJAX-регистрация
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                document.getElementById('usernameError').innerHTML = '';
+                document.getElementById('emailError').innerHTML = '';
+                document.getElementById('passwordError').innerHTML = '';
+                document.getElementById('password2Error').innerHTML = '';
+
+                const formData = new FormData(registerForm);
+                try {
+                    const response = await fetch("{{ url_for('register') }}", {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        window.location.href = data.redirect || "{{ url_for('index') }}";
+                    } else {
+                        if (data.errors) {
+                            if (data.errors.username) document.getElementById('usernameError').innerHTML = data.errors.username;
+                            if (data.errors.email) document.getElementById('emailError').innerHTML = data.errors.email;
+                            if (data.errors.password) document.getElementById('passwordError').innerHTML = data.errors.password;
+                            if (data.errors.password2) document.getElementById('password2Error').innerHTML = data.errors.password2;
+                        } else if (data.message) {
+                            alert(data.message);
+                        } else {
+                            alert('Ошибка регистрации. Проверьте правильность заполнения формы.');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Сетевая ошибка:', error);
+                    alert('Не удалось соединиться с сервером. Проверьте подключение.');
+                }
+            });
+        }
+
+        // Отметка уведомлений прочитанными (все)
+        const markReadBtn = document.getElementById('markNotificationsRead');
+        if (markReadBtn) {
+            markReadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('/notifications/read', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        const badge = document.querySelector('.notification-badge');
+                        if (badge) badge.remove();
+                        document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                    } else {
+                        console.error('Ошибка при отметке уведомлений:', response.status);
+                    }
+                })
+                .catch(err => console.error('Ошибка сети:', err));
+            });
+        }
+
+        // Клик по отдельному уведомлению – помечаем все как прочитанные и переходим
+        const notificationItems = document.querySelectorAll('.notification-item');
+        if (notificationItems.length) {
+            notificationItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (!this.classList.contains('unread')) return;
+                    e.preventDefault();
+                    const targetUrl = this.getAttribute('href');
+                    fetch('/notifications/read', {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            const badge = document.querySelector('.notification-badge');
+                            if (badge) badge.remove();
+                            document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                        }
+                        window.location.href = targetUrl;
+                    })
+                    .catch(() => window.location.href = targetUrl);
+                });
+            });
+        }
+
+        // Голосование за комментарии
+        document.body.addEventListener('click', async function(e) {
+            const upBtn = e.target.closest('.vote-up');
+            const downBtn = e.target.closest('.vote-down');
+            if (!upBtn && !downBtn) return;
+            e.preventDefault();
+            const btn = upBtn || downBtn;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            const commentId = btn.dataset.commentId;
+            const type = btn.dataset.voteType;
+            try {
+                const response = await fetch(`/vote_comment/${commentId}?type=${type}`, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const card = btn.closest('.comment-item');
+                    const scoreSpan = card.querySelector('.vote-score');
+                    const upVote = card.querySelector('.vote-up');
+                    const downVote = card.querySelector('.vote-down');
+                    scoreSpan.innerText = data.new_score;
+                    upVote.classList.remove('voted');
+                    downVote.classList.remove('voted');
+                    if (data.voted) {
+                        if (data.vote_type === 'up') upVote.classList.add('voted');
+                        else downVote.classList.add('voted');
+                    }
+                }
+            } catch(err) {
+                console.error('Ошибка голосования', err);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

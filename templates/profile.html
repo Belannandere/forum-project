@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="profile-header-wrapper">
+            <!-- Баннер -->
+            <div class="profile-banner {% if profile_user.banner %}has-banner{% endif %}"
+                 {% if profile_user.banner %}
+                 data-banner-url="{{ url_for('static', filename='uploads/banners/' + profile_user.banner) }}"
+                 {% endif %}>
+            </div>
+
+            <!-- Аватар -->
+            <div class="profile-avatar-wrapper">
+                {% if profile_user.avatar %}
+                    <img src="{{ url_for('static', filename='uploads/avatars/' + profile_user.avatar) }}" class="profile-avatar">
+                {% else %}
+                    <div class="profile-avatar-placeholder">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Информация -->
+            <div class="profile-info">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h2 class="profile-username">{{ profile_user.username }}</h2>
+                    {% if current_user.id == profile_user.id %}
+                        <a href="{{ url_for('edit_profile') }}" class="btn-edit-icon">
+                            <i class="fas fa-pencil-alt"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="profile-stats">
+                    <span><strong class="text-accent">{{ profile_user.posts|length }}</strong> тем</span>
+                    <span class="mx-2">•</span>
+                    <span><strong class="text-accent">{{ profile_user.comments|length }}</strong> комментариев</span>
+                </div>
+                {% if profile_user.bio %}
+                    <p class="profile-bio">{{ profile_user.bio }}</p>
+                {% else %}
+                    <p class="profile-bio text-muted">Нет информации о себе</p>
+                {% endif %}
+                <div class="profile-joined">
+                    <i class="far fa-calendar-alt me-1"></i> Зарегистрирован: {{ profile_user.created_at.strftime('%d.%m.%Y') }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Список тем пользователя -->
+        <div class="profile-posts">
+            <div class="profile-posts-title">ТЕМЫ ПОЛЬЗОВАТЕЛЯ</div>
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="profile-post-item">
+                        <a href="{{ url_for('view_post', slug=post.slug) }}" class="profile-post-title">{{ post.title }}</a>
+                        <div class="profile-post-meta">
+                            <i class="far fa-clock me-1"></i> {{ post.created_at|time_ago }}
+                            <i class="far fa-comment ms-2 me-1"></i> {{ post.comments|length }} ответов
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted text-center py-4">Пользователь ещё не создавал тем</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    document.querySelectorAll('.profile-banner.has-banner').forEach(function(el) {
+        var url = el.getAttribute('data-banner-url');
+        if (url) {
+            el.style.backgroundImage = 'url(' + url + ')';
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+        }
+    });
+</script>
+{% endblock %}

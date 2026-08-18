@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-container">
+            <div class="sidebar-title mb-4">НАСТРОЙКИ</div>
+
+            <!-- Внешний вид -->
+            <div class="settings-section">
+                <div class="settings-title">ВНЕШНИЙ ВИД</div>
+                <div class="theme-toggle">
+                    <i class="fas fa-sun theme-icon" id="themeLight"></i>
+                    <i class="fas fa-moon theme-icon" id="themeDark"></i>
+                </div>
+            </div>
+
+            <!-- Почта -->
+            <div class="settings-section">
+                <div class="settings-title">ПОЧТА</div>
+                <form method="POST" action="{{ url_for('settings') }}" class="settings-form">
+                    {{ email_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ email_form.email(class="form-control-minimal w-100", placeholder="Новый email") }}
+                        {% for error in email_form.email.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn-accent">Обновить email</button>
+                </form>
+            </div>
+
+            <!-- Безопасность -->
+            <div class="settings-section">
+                <div class="settings-title">БЕЗОПАСНОСТЬ</div>
+                <form method="POST" action="{{ url_for('settings') }}" class="settings-form">
+                    {{ password_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ password_form.current_password(class="form-control-minimal w-100", placeholder="Текущий пароль") }}
+                        {% for error in password_form.current_password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ password_form.new_password(class="form-control-minimal w-100", placeholder="Новый пароль") }}
+                        {% for error in password_form.new_password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ password_form.confirm_password(class="form-control-minimal w-100", placeholder="Повторите пароль") }}
+                        {% for error in password_form.confirm_password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn-accent">Сменить пароль</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const lightIcon = document.getElementById('themeLight');
+    const darkIcon = document.getElementById('themeDark');
+    
+    function updateThemeIcons(theme) {
+        if (theme === 'dark') {
+            lightIcon.classList.remove('active');
+            darkIcon.classList.add('active');
+        } else {
+            darkIcon.classList.remove('active');
+            lightIcon.classList.add('active');
+        }
+    }
+    
+    const isDark = document.body.classList.contains('dark-theme');
+    updateThemeIcons(isDark ? 'dark' : 'light');
+    
+    lightIcon.addEventListener('click', () => {
+        window.setTheme('light');
+        updateThemeIcons('light');
+    });
+    
+    darkIcon.addEventListener('click', () => {
+        window.setTheme('dark');
+        updateThemeIcons('dark');
+    });
+</script>
+{% endblock %}

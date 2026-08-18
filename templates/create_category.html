@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="form-container">
+            <div class="sidebar-title mb-4">СОЗДАНИЕ КАТЕГОРИИ</div>
+            
+            <form id="categoryForm">
+                <div class="mb-4">
+                    <input type="text" id="categoryName" class="form-control-minimal w-100" placeholder="Название категории" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="categoryIcon" class="form-control-minimal w-100" placeholder="Иконка (например, fas fa-leaf)" value="fas fa-folder">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label-caps">Цвет категории</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="color" id="categoryColor" class="form-control form-control-color w-100" value="#4a6741">
+                        <div class="color-preview" id="colorPreview" style="background-color: #4a6741; width: 48px; height: 48px; border-radius: 12px;"></div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('index') }}" class="btn-outline-accent">Отмена</a>
+                    <button type="submit" class="btn-accent" id="submitBtn">
+                        <span class="btn-text">Создать</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const colorInput = document.getElementById('categoryColor');
+    const colorPreview = document.getElementById('colorPreview');
+    const categoryForm = document.getElementById('categoryForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    colorInput.addEventListener('input', function() {
+        colorPreview.style.backgroundColor = this.value;
+    });
+    
+    categoryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('categoryName').value;
+        const icon_class = document.getElementById('categoryIcon').value;
+        const color = colorInput.value;
+        
+        const btnText = submitBtn.querySelector('.btn-text');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        btnText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch("{{ url_for('create_category_ajax') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+                body: JSON.stringify({ name: name, color: color, icon_class: icon_class })
+            });
+            
+            if (response.ok) {
+                window.location.href = "{{ url_for('index') }}";
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Ошибка при создании категории');
+                btnText.classList.remove('d-none');
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            alert('Ошибка соединения');
+            btnText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}

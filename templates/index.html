@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Поле поиска над темами (центрируется через CSS) -->
+<div class="search-section">
+    <div class="search-wrapper">
+        <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input w-100" id="searchInput" placeholder="Поиск по форуму...">
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mb-4">
+    <div class="dropdown">
+        <button class="btn-sort-dropdown dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if current_sort == 'popular' %}По популярности
+            {% elif current_sort == 'updated' %}По обновлению
+            {% else %}Новые{% endif %}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+            <li><a class="dropdown-item {% if current_sort == 'new' %}active{% endif %}" href="{{ url_for('index', sort='new') }}">Новые</a></li>
+            <li><a class="dropdown-item {% if current_sort == 'popular' %}active{% endif %}" href="{{ url_for('index', sort='popular') }}">По популярности</a></li>
+            <li><a class="dropdown-item {% if current_sort == 'updated' %}active{% endif %}" href="{{ url_for('index', sort='updated') }}">Дате обновления</a></li>
+        </ul>
+    </div>
+</div>
+
+{% if posts %}
+    <div class="topics-list">
+        {% for post in posts %}
+            <div class="topic-item">
+                <div class="topic-header">
+                    <div class="topic-title">
+                        <a href="{{ url_for('view_post', slug=post.slug) }}">{{ post.title }}</a>
+                    </div>
+                    <div class="topic-stats">
+                        <span><i class="far fa-heart"></i> {{ post.likes }}</span>
+                        <span><i class="far fa-comment"></i> {{ post.comments|length }}</span>
+                        <span><i class="far fa-eye"></i> {{ post.views }}</span>
+                    </div>
+                </div>
+                <div class="topic-meta">
+                    <span><i class="far fa-user"></i> <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username }}</a></span>
+                    <span><i class="far fa-clock"></i> {{ post.created_at|time_ago }}</span>
+                    <span class="topic-category"><i class="fas fa-tag"></i> {{ post.category.name }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center gap-1">
+                {% for p in pagination.iter_pages() %}
+                    {% if p %}
+                        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('index', page=p, sort=current_sort) }}">{{ p }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <p class="empty-message">Тем пока нет. Будьте первым!</p>
+        <a href="{{ url_for('create_post') }}" class="btn-new-topic">Создать тему</a>
+    </div>
+{% endif %}
+
+<script>
+    // Обработчик поиска
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const q = this.value.trim();
+                if (q) window.location.href = "{{ url_for('search') }}?q=" + encodeURIComponent(q);
+            }
+        });
+    }
+</script>
+{% endblock %}

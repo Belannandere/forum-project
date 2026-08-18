@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="form-container">
+            <h4 class="mb-4">Редактирование комментария</h4>
+            <form method="POST" id="editCommentForm">
+                <!-- Поле CSRF не требуется, так как маршрут помечен @csrf.exempt -->
+                <div class="mb-4">
+                    <div id="quill-editor" style="min-height: 150px;">{{ comment.content|safe }}</div>
+                </div>
+                <input type="hidden" name="content" id="hiddenContent">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('view_post', slug=comment.post.slug) }}" class="btn-outline-accent">Отмена</a>
+                    <button type="submit" class="btn-accent" id="submitCommentBtn">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Текст комментария...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link']
+            ]
+        }
+    });
+
+    quill.root.innerHTML = `{{ comment.content|safe }}`;
+
+    if (document.body.classList.contains('dark-theme')) {
+        var qlToolbar = document.querySelector('.ql-toolbar');
+        var qlContainer = document.querySelector('.ql-container');
+        if (qlToolbar) {
+            qlToolbar.style.backgroundColor = '#1e1e1e';
+            qlToolbar.style.borderColor = '#333';
+        }
+        if (qlContainer) {
+            qlContainer.style.backgroundColor = '#1e1e1e';
+            qlContainer.style.borderColor = '#333';
+        }
+    }
+
+    var editForm = document.getElementById('editCommentForm');
+    var hiddenInput = document.getElementById('hiddenContent');
+    var submitBtn = document.getElementById('submitCommentBtn');
+
+    if (editForm && hiddenInput && quill) {
+        editForm.addEventListener('submit', function(e) {
+            hiddenInput.value = quill.root.innerHTML;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Сохранение...';
+            }
+        });
+    }
+</script>
+{% endblock %}

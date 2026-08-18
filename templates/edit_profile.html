@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-container">
+            <div class="form-title">РЕДАКТИРОВАНИЕ ПРОФИЛЯ</div>
+
+            <form method="POST" enctype="multipart/form-data" id="editProfileForm">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label class="form-label-caps">Имя пользователя</label>
+                    {{ form.username(class="form-control-minimal w-100", placeholder="Имя пользователя") }}
+                    {% for error in form.username.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label-caps">О себе</label>
+                    {{ form.bio(class="form-control-minimal w-100", rows="4", placeholder="Расскажите о себе...") }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label-caps">Аватар</label>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label">
+                            <i class="fas fa-image"></i> Изменить фото
+                            {{ form.avatar(class="file-upload-input", accept="image/*", id="avatarInput") }}
+                        </label>
+                        <div id="avatarPreviewContainer" class="mt-2">
+                            {% if current_user.avatar %}
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) }}" class="current-image" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        {% if current_user.avatar %}
+                            <div class="mt-2">
+                                <button type="button" class="btn-icon-delete" data-type="avatar" title="Удалить аватар">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label-caps">Баннер профиля</label>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label">
+                            <i class="fas fa-camera"></i> Загрузить баннер
+                            {{ form.banner(class="file-upload-input", accept="image/*", id="bannerInput") }}
+                        </label>
+                        <div id="bannerPreviewContainer" class="mt-2">
+                            {% if current_user.banner %}
+                                <img src="{{ url_for('static', filename='uploads/banners/' + current_user.banner) }}" class="current-banner-preview" style="max-height: 80px; border-radius: 8px;">
+                            {% endif %}
+                        </div>
+                        {% if current_user.banner %}
+                            <div class="mt-2">
+                                <button type="button" class="btn-icon-delete" data-type="banner" title="Удалить баннер">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('profile', username=current_user.username) }}" class="btn-outline-accent">Отмена</a>
+                    <button type="submit" class="btn-accent">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Предпросмотр аватара
+    const avatarInput = document.querySelector('input[name="avatar"]');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.querySelector('.current-image');
+                    if (preview) {
+                        preview.src = event.target.result;
+                    } else {
+                        const wrapper = document.querySelector('#avatarPreviewContainer');
+                        const img = document.createElement('img');
+                        img.className = 'current-image';
+                        img.src = event.target.result;
+                        img.style.width = '60px';
+                        img.style.height = '60px';
+                        img.style.borderRadius = '50%';
+                        img.style.objectFit = 'cover';
+                        wrapper.appendChild(img);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Предпросмотр баннера
+    const bannerInput = document.getElementById('bannerInput');
+    const bannerPreviewContainer = document.getElementById('bannerPreviewContainer');
+    if (bannerInput) {
+        bannerInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    bannerPreviewContainer.innerHTML = `<img src="${event.target.result}" class="current-banner-preview" style="max-height: 80px; border-radius: 8px; margin-top: 8px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Удаление аватара/баннера через AJAX
+    document.querySelectorAll('.btn-icon-delete').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            const type = this.dataset.type;
+            if (!confirm(`Удалить ${type === 'avatar' ? 'аватар' : 'баннер'}?`)) return;
+            const response = await fetch(`/delete-${type}`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            if (data.success) {
+                if (type === 'avatar') {
+                    document.getElementById('avatarPreviewContainer').innerHTML = '';
+                    this.closest('.form-group').querySelector('.current-image')?.remove();
+                    this.remove();
+                } else {
+                    document.getElementById('bannerPreviewContainer').innerHTML = '';
+                    this.closest('.form-group').querySelector('.current-banner-preview')?.remove();
+                    this.remove();
+                }
+            } else {
+                alert('Ошибка при удалении');
+            }
+        });
+    });
+</script>
+{% endblock %}

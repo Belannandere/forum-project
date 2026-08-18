@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="form-container">
+            <h4 class="mb-4">Новая тема</h4>
+            <form method="POST" id="postForm" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-4">
+                    {{ form.title(class="form-control-minimal w-100", placeholder="Заголовок", required=true) }}
+                </div>
+
+                <div class="mb-4">
+                    {{ form.category(class="form-control-minimal w-100") }}
+                </div>
+
+                <!-- Контейнер Quill редактора -->
+                <div class="mb-4">
+                    <div id="quill-editor" style="min-height: 250px;"></div>
+                </div>
+
+                <!-- Скрытое поле для отправки HTML-контента -->
+                <input type="hidden" name="content" id="hiddenContent">
+
+                <!-- Поле для прикрепления медиа (стилизованное) -->
+                <div class="mb-4">
+                    <label class="form-label-caps">{{ form.media.label.text }}</label>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label">
+                            <i class="fas fa-image"></i> Выбрать файл
+                            {{ form.media(class="file-upload-input", accept="image/*,video/*", id="postMedia") }}
+                        </label>
+                        <div id="mediaPreviewContainer" class="mt-2"></div>
+                    </div>
+                    <small class="text-muted">Максимальный размер: 16 МБ. Поддерживаются изображения и видео.</small>
+                    {% for error in form.media.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Кнопки -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('index') }}" class="btn-outline-accent">Отмена</a>
+                    <button type="submit" class="btn-accent">Опубликовать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Инициализация Quill
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Текст сообщения...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link']
+            ]
+        }
+    });
+
+    if (document.body.classList.contains('dark-theme')) {
+        var qlToolbar = document.querySelector('.ql-toolbar');
+        var qlContainer = document.querySelector('.ql-container');
+        if (qlToolbar) {
+            qlToolbar.style.backgroundColor = '#1e1e1e';
+            qlToolbar.style.borderColor = '#333';
+        }
+        if (qlContainer) {
+            qlContainer.style.backgroundColor = '#1e1e1e';
+            qlContainer.style.borderColor = '#333';
+            qlContainer.style.color = '#e0e0e0';
+        }
+    }
+
+    // Передача HTML-контента в скрытое поле
+    var postForm = document.getElementById('postForm');
+    var hiddenInput = document.getElementById('hiddenContent');
+    if (postForm && hiddenInput) {
+        postForm.addEventListener('submit', function() {
+            hiddenInput.value = quill.root.innerHTML;
+        });
+    }
+
+    // Превью выбранного медиафайла
+    const mediaInput = document.getElementById('postMedia');
+    const mediaPreview = document.getElementById('mediaPreviewContainer');
+    if (mediaInput) {
+        mediaInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (file.type.startsWith('image/')) {
+                        mediaPreview.innerHTML = `<img src="${event.target.result}" class="current-media-preview" style="max-height: 100px; border-radius: 8px;">`;
+                    } else if (file.type.startsWith('video/')) {
+                        mediaPreview.innerHTML = `<video controls style="max-height: 100px; border-radius: 8px;"><source src="${event.target.result}"></video>`;
+                    } else {
+                        mediaPreview.innerHTML = `<span>${file.name}</span>`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                mediaPreview.innerHTML = '';
+            }
+        });
+    }
+</script>
+{% endblock %}

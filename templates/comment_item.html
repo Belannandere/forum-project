@@ -1,0 +1,39 @@
+<div class="comment-item">
+    <div class="comment-avatar">
+        {% if comment.author.avatar %}
+            <img src="{{ url_for('static', filename='uploads/avatars/' + comment.author.avatar) }}" alt="avatar">
+        {% else %}
+            <i class="far fa-user-circle fa-lg"></i>
+        {% endif %}
+    </div>
+    <div class="comment-content">
+        <div class="comment-header">
+            <span class="comment-author"><a href="{{ url_for('profile', username=comment.author.username) }}">{{ comment.author.username }}</a></span>
+            <span class="comment-date">{{ comment.created_at|time_ago }}</span>
+        </div>
+        <div class="comment-body">{{ comment.content|safe }}</div>
+        <div class="comment-actions">
+            {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.role in ['admin', 'moderator']) %}
+                <div class="comment-more">
+                    <button class="more-btn">⋯</button>
+                    <div class="more-dropdown">
+                        <a href="{{ url_for('edit_comment', comment_id=comment.id) }}">Редактировать</a>
+                        <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="POST" onsubmit="return confirm('Удалить комментарий?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit">Удалить</button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="comment-votes">
+        <button class="vote-up {% if current_user.is_authenticated and comment.user_vote == 1 %}voted{% endif %}" data-comment-id="{{ comment.id }}" data-vote-type="up">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <span class="vote-score">{{ comment.votes_total or 0 }}</span>
+        <button class="vote-down {% if current_user.is_authenticated and comment.user_vote == -1 %}voted{% endif %}" data-comment-id="{{ comment.id }}" data-vote-type="down">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+    </div>
+</div>

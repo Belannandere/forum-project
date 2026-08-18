@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Все категории</h2>
+
+<div class="row">
+    {% for cat, count in categories %}
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="category-card">
+            <div class="category-icon">
+                <i class="{{ cat.icon_class }} fa-2x"></i>
+            </div>
+            <div class="category-info">
+                <h5 class="category-name">
+                    <a href="{{ url_for('index', category=cat.slug) }}">{{ cat.name }}</a>
+                </h5>
+                <div class="category-stats">
+                    <span><i class="far fa-file-alt"></i> {{ count }} {{ count|pluralize('тема,темы,тем') }}</span>
+                </div>
+                {% if cat.description %}
+                    <p class="category-desc">{{ cat.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">Категории пока не созданы.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.category-card {
+    background: var(--bg-card);
+    border-radius: 1rem;
+    padding: 1.2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+    height: 100%;
+}
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+.category-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background-color: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.category-info {
+    flex: 1;
+}
+.category-name {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+.category-name a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+.category-name a:hover {
+    color: var(--accent);
+}
+.category-stats {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.category-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+</style>
+
+{% endblock %}
+
+{% macro pluralize(number, forms) %}
+    {% set n = number % 100 %}
+    {% if n > 20 %}{% set n = n % 10 %}{% endif %}
+    {% if n == 1 %}{{ forms.split(',')[0] }}
+    {% elif n >= 2 and n <= 4 %}{{ forms.split(',')[1] }}
+    {% else %}{{ forms.split(',')[2] }}{% endif %}
+{% endmacro %}
