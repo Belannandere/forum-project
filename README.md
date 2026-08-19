@@ -79,33 +79,37 @@ python seed.py
 
 ## 📸 Скриншоты
 
+<div align="center">
+
 ### Главная страница
-![Главная страница](screenshots/main-page.png)
-*Лента постов с сортировкой и поиском.*
+<img src="screenshots/main-page.png" alt="Главная страница" width="500" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+<p style="margin-top: 6px; font-size: 0.9rem; color: #555;">Лента постов с сортировкой и поиском.</p>
 
 ---
 
 ### Страница поста
-![Страница поста](screenshots/post-page.png)
-*Просмотр темы, комментарии и голосование.*
+<img src="screenshots/post-page.png" alt="Страница поста" width="500" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+<p style="margin-top: 6px; font-size: 0.9rem; color: #555;">Просмотр темы, комментарии и голосование.</p>
 
 ---
 
 ### Создание нового поста
-![Создание поста](screenshots/create-post.png)
-*Редактор Quill и загрузка изображений/видео.*
+<img src="screenshots/create-post.png" alt="Создание поста" width="500" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+<p style="margin-top: 6px; font-size: 0.9rem; color: #555;">Редактор Quill и загрузка изображений/видео.</p>
 
 ---
 
 ### Профиль пользователя
-![Профиль](screenshots/profile-page.png)
-*Аватар, баннер, биография и список тем.*
+<img src="screenshots/profile-page.png" alt="Профиль" width="500" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+<p style="margin-top: 6px; font-size: 0.9rem; color: #555;">Аватар, баннер, биография и список тем.</p>
 
 ---
 
 ### Панель администратора
-![Админ-панель](screenshots/admin-panel.png)
-*Управление ролями и блокировка пользователей.*
+<img src="screenshots/admin-panel.png" alt="Админ-панель" width="500" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);">
+<p style="margin-top: 6px; font-size: 0.9rem; color: #555;">Управление ролями и блокировка пользователей.</p>
+
+</div>
 
 ---
 
